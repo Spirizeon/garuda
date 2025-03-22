@@ -1,0 +1,147 @@
+{
+    "_id": "67d854e46af0e3f8c3993926",
+    "skills": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "fastAPI"
+    ],
+    "academic": [
+      {
+        "institution": "Delhi Public School",
+        "degree": "High School",
+        "fieldOfStudy": "Science",
+        "startDate": "2015-04-01T00:00:00.000Z",
+        "endDate": "2017-03-31T00:00:00.000Z",
+        "description": "Completed high school with Science stream.",
+        "grade": "A"
+      },
+      {
+        "institution": "SRM University AP",
+        "degree": "B.Tech",
+        "fieldOfStudy": "Computer Science",
+        "startDate": "2020-08-01T00:00:00.000Z",
+        "endDate": "2024-06-01T00:00:00.000Z",
+        "description": "Studied Artificial Intelligence and Blockchain.",
+        "grade": "A"
+      }
+    ],
+    "projects": [
+      {
+        "title": "AI Chatbot",
+        "description": "Developed an AI-based chatbot for customer support.",
+        "startDate": "2023-01-01T00:00:00.000Z",
+        "endDate": "2023-06-01T00:00:00.000Z",
+        "technologiesUsed": [
+          "Python",
+          "TensorFlow",
+          "Flask"
+        ],
+        "projectLink": "https://github.com/user/ai-chatbot",
+        "isOpenSource": true
+      },
+      {
+        "title": "Blockchain-Based Voting System",
+        "description": "Created a secure blockchain-based voting platform.",
+        "startDate": "2022-09-01T00:00:00.000Z",
+        "endDate": "2023-03-01T00:00:00.000Z",
+        "technologiesUsed": [
+          "Solidity",
+          "Ethereum",
+          "React"
+        ],
+        "projectLink": "https://github.com/user/blockchain-voting",
+        "isOpenSource": true
+      }
+    ],
+    "workEx": [
+      {
+        "company": "Google",
+        "position": "Software Engineer",
+        "startDate": "2022-06-01T00:00:00.000Z",
+        "endDate": "2024-03-01T00:00:00.000Z",
+        "description": "Worked on AI-powered search algorithms.",
+        "isCurrent": false
+      },
+      {
+        "company": "Microsoft",
+        "position": "Senior Developer",
+        "startDate": "2024-04-01T00:00:00.000Z",
+        "description": "Developing cloud-based applications.",
+        "isCurrent": true
+      }
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Solutions Architect",
+        "issuingOrganization": "Amazon Web Services",
+        "issueDate": "2023-05-10T00:00:00.000Z",
+        "expirationDate": "2026-05-10T00:00:00.000Z",
+        "credentialId": "AWS-12345",
+        "credentialURL": "https://aws.amazon.com/certification/verify/"
+      },
+      {
+        "name": "Google Cloud Professional Architect",
+        "issuingOrganization": "Google Cloud",
+        "issueDate": "2022-08-15T00:00:00.000Z",
+        "expirationDate": "2025-08-15T00:00:00.000Z",
+        "credentialId": "GCP-67890",
+        "credentialURL": "https://google.com/certification/verify/"
+      }
+    ],
+    "achievements": [
+      {
+        "title": "Winner - Hackathon 2023",
+        "description": "Secured 1st place in a national-level AI Hackathon.",
+        "date": "2023-07-15T00:00:00.000Z",
+        "issuer": "Tech Fest India"
+      },
+      {
+        "title": "Top Performer - AI Research",
+        "description": "Recognized as the top performer in an AI research internship.",
+        "date": "2022-12-10T00:00:00.000Z",
+        "issuer": "SRM University AP"
+      }
+    ],
+    "publications": [
+      {
+        "title": "AI in Healthcare",
+        "publisher": "Springer",
+        "publicationDate": "2022-06-15T00:00:00.000Z",
+        "description": "Research paper on AI applications in healthcare.",
+        "link": "https://example.com/ai-healthcare"
+      },
+      {
+        "title": "Blockchain Security",
+        "publisher": "IEEE",
+        "publicationDate": "2021-10-10T00:00:00.000Z",
+        "description": "A detailed study on blockchain security challenges.",
+        "link": "https://example.com/blockchain-security"
+      }
+    ],
+    "createdAt": "2025-03-17T16:59:16.275Z",
+    "updatedAt": "2025-03-17T21:51:35.382Z",
+    "__v": 0,
+    "personalInfo": {
+      "address": {
+        "street": "123 Main Street",
+        "city": "New York",
+        "state": "NY"
+      },
+      "dateOfBirth": "1990-05-20T00:00:00.000Z",
+      "email": "john.doe@example.com",
+      "firstName": "maheep",
+      "lastName": "Doe",
+      "phone": "1234567890",
+      "resume": "https://example.com/resume.pdf"
+    },
+    "socials": {
+      "linkedIn": "https://www.linkedin.com/in/johndoe",
+      "github": "https://github.com/johndoe",
+      "twitter": "https://twitter.com/johndoe",
+      "website": "https://maheep.dev",
+      "medium": "https://medium.com/johndoe",
+      "stackOverflow": "https://stackoverflow.com/users/1234567/johndoe",
+      "leetcode": "https://leetcode.com/johndoe"
+    }
+  }

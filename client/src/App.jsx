@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 import Auth from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/ProfilePage';
+import Resume from './pages/Resume';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/resume" element={<Resume />} />
 
           <Route path="/:id/dashboard/" element={<Dashboard />} >
             <Route path="profile" element={<ProfilePage />} />
