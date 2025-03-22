@@ -1,10 +1,16 @@
 import React from 'react'
+import ResumeCards from '@/components/ChooseResume/ResumeCards'
+import Topbar from '@/components/Topbar'
 
 const ChooseResume = () => {
   return (
-    <div>
-      
-    </div>
+    <>
+    <Topbar/>
+
+    <ResumeCards/>
+    <ResumeCards/>
+    <ResumeCards/>
+    </>
   )
 }
 

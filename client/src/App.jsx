@@ -7,6 +7,7 @@ import Auth from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/ProfilePage';
 import ResumeDev from './pages/ResumeDev';
+import ChooseResume from './pages/ChooseResume';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/resume/dev" element={<ResumeDev />} />
+          <Route path="/resume" element={<ChooseResume />} />
 
           <Route path="/:id/dashboard/" element={<Dashboard />} >
             <Route path="profile" element={<ProfilePage />} />
