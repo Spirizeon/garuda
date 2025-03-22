@@ -53,7 +53,7 @@ const Footer = () => {
             </div>
 
             <div className="mt-10 border-t border-gray-700 pt-4 text-center">
-                <p className="text-sm">&copy; {new Date().getFullYear()} up.ly All rights reserved.</p>
+                <p className="text-sm">&copy; {new Date().getFullYear()} Garuda All rights reserved.</p>
             </div>
         </footer>
     );

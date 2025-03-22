@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardDescription, CardTitle } from "../ui/card";
 import { FileUser, LayoutTemplate, ShieldQuestion } from "lucide-react";
-import feature from '../../assets/feature.svg';
+import { BackgroundGradient } from '../ui/background-gradient';
 
 const features = [
     {
@@ -23,30 +23,33 @@ const features = [
 
 const Features = () => {
     return (
-        <div className="w-full flex flex-col lg:flex-row items-end gap-6 px-4 md:px-8 py-10 md:py-20 bg-black" id='services' >
+        <div className="w-full flex flex-col lg:flex-row items-end gap-6 px-4 md:px-8 py-10 md:py-20" id='services'>
             {/* Text Section */}
-            <div className="w-full lg:w-1/2 flex flex-col items-start">
-                <h2 className="text-3xl md:text-5xl font-bold py-2"> <span className='text-green-500'>Client-Centric </span> Services</h2>
-                <p className="text-sm md:text-lg mt-2">Tailored resumes, automated portfolio updates, and AI-curated interview questions — all in one platform!</p>
+            <div className="w-full flex flex-col items-start">
+                <h2 className="text-3xl md:text-5xl font-bold py-2">
+                    <span className='text-green-500'>Client-Centric </span> Services
+                </h2>
+                <p className="text-sm md:text-lg mt-2">
+                    Tailored resumes, automated portfolio updates, and AI-curated interview questions — all in one platform!
+                </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6 mt-6" >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 ">
                     {features.map((feature, index) => (
-                        <Card key={index} className="p-4 rounded-lg shadow-md flex bg-black">
-                            <div className='w-1/5 flex justify-center items-center'>
-                                {feature.icon}
-                            </div>
-                            <div className='w-4/5 flex flex-col justify-center items-start '>
-                                <CardTitle className="text-lg md:text-xl font-semibold py-1">{feature.title}</CardTitle>
-                                <CardDescription className='text-xs md:text-sm py-1'>{feature.description}</CardDescription>
-                            </div>
-                        </Card>
+                        <BackgroundGradient key={index} className="rounded-lg">
+                            <Card className="p-6 rounded-lg shadow-md flex flex-col items-center text-center dark:bg-black">
+                                <div className="mb-4">
+                                    {feature.icon}
+                                </div>
+                                <CardTitle className="text-lg md:text-xl font-semibold py-2">
+                                    {feature.title}
+                                </CardTitle>
+                                <CardDescription className="text-sm md:text-base">
+                                    {feature.description}
+                                </CardDescription>
+                            </Card>
+                        </BackgroundGradient>
                     ))}
                 </div>
-            </div>
-
-            {/* Image Section */}
-            <div className="w-full lg:w-1/2 flex justify-center items-end mt-6 lg:mt-0 ">
-                <img src={feature} alt="Illustration" className="w-3/4 h-auto max-w-md" />
             </div>
         </div>
     );

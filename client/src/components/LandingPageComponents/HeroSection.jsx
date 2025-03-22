@@ -6,7 +6,7 @@ import Hero from "../../assets/Hero.svg";
 import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
 import { PinContainer } from "../ui/3d-pin";
-import Resumes from "../../assets/resumes.webp";
+import Resumes from "../../assets/Resumes.png";
 
 // Sample resume image URL
 const sampleResumeImage =
@@ -61,17 +61,17 @@ const HeroSection = () => {
 
       <PinContainer title="/garuda.resume.build" href="/">
         <div className="flex basis-full flex-col px-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem]">
-          <h3 className="max-w-xs !pb-2 !m-0 font-bold text-base text-slate-100">
+          <h3 className="max-w-xs !pb-2 !m-0 font-bold text-base text-blue-500">
             Garuda
           </h3>
           <div className="text-base !m-0 !p-0 font-normal">
-            <span className="text-slate-500 ">Build and grow!</span>
+            <span className="text-yellow-200 ">Build Strong, Fly Higher!</span>
           </div>
           {/* Added sample resume image */}
           <img
             src={Resumes}
             alt="Sample Resume"
-            className="w-full h-auto rounded-lg shadow-md p-4"
+            className="w-full h-auto rounded-lg shadow-md p-4 bg-black"
           />
         </div>
       </PinContainer>
