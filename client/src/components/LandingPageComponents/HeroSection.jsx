@@ -25,7 +25,7 @@ const words = [
 const HeroSection = () => {
   return (
     <div className="w-full h-screen flex flex-col lg:flex-row justify-center items-center px-4 lg:px-8">
-      <div className="w-full lg:w-1/2 h-auto lg:h-full flex flex-col justify-center items-center lg:items-start gap-4">
+      <div className="w-full lg:w-1/2 h-auto lg:h-full flex flex-col justify-center items-center lg:items-start gap-4 text-2xl">
         <main className="text-2xl sm:text-3xl md:text-4xl font-bold text-center lg:text-left">
           <h1 className="inline">
             <span className="inline bg-gradient-to-r from-[#F596D3] to-[#D247BF] text-transparent bg-clip-text">
@@ -51,7 +51,7 @@ const HeroSection = () => {
             <HoverBorderGradient
               containerClassName="rounded-full"
               as="button"
-              className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2"
+              className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2 text-xl"
             >
               <span>Getting Started</span>
             </HoverBorderGradient>
