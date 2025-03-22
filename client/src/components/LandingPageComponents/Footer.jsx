@@ -11,7 +11,7 @@ const Footer = () => {
                 <div className="flex flex-col">
                     <h3 className="text-lg font-bold mb-4">About Us</h3>
                     <p className="text-sm">
-                        Up.ly is an AI-powered career tool designed to streamline your job application process.
+                        Garuda is an AI-powered career tool designed to streamline your job application process.
                     </p>
                 </div>
 
@@ -36,7 +36,7 @@ const Footer = () => {
                 </div>
 
                 {/* Social Media Section */}
-                <div className="flex flex-col">
+                <div className="flex flex-col ml-12">
                     <h3 className="text-lg font-bold mb-4">Follow Us</h3>
                     <div className="flex space-x-4">
                         <a href="#" className="hover:text-gray-400">
