@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pdfplumber
+PyMuPDF
+mimetypes
+opencv-python
+numpy
+typing
+python-multipart
+pydantic
