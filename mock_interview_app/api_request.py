@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 import json
 import logging
@@ -39,12 +40,32 @@ def get_llm() -> ChatGroq:
         return ChatGroq(
             api_key=groq_api_key,
             model_name=model_name,
-            temperature=0.7,
+            temperature=0.2,  # Reduced temperature for more deterministic evaluations
             max_tokens=1024
         )
     except Exception as e:
         logger.error(f"Failed to initialize Groq LLM: {e}")
         raise
+
+def is_dont_know_answer(answer: str) -> bool:
+    """Check if an answer indicates the candidate doesn't know.
+    
+    Args:
+        answer: The candidate's answer text
+        
+    Returns:
+        bool: True if answer indicates lack of knowledge
+    """
+    if not answer:
+        return True
+        
+    answer_lower = answer.lower().strip()
+    dont_know_phrases = [
+        "i don't know", "i donot know", "don't know", "no idea", 
+        "i am sorry", "i'm sorry", "not sure", "cannot answer", 
+        "can't answer", "unable to answer"
+    ]
+    return any(phrase in answer_lower for phrase in dont_know_phrases)
 
 def calculate_percentage(result_list: List[str], marking: Dict[str, int]) -> int:
     """Calculate percentage score based on evaluation results.
@@ -168,19 +189,47 @@ def prepare_prompt_for_answercheck(question_answer_pair: Dict[str, str]) -> str:
     if not question_answer_pair:
         raise ValueError("Question-answer pairs cannot be empty")
     
+    # Default evaluation prompt template if file loading fails
+    default_prompt_template = """You are an expert technical interviewer evaluating candidate responses to interview questions.
+
+Your task is to evaluate the following question-answer pairs based on technical accuracy, completeness, and clarity.
+
+For each answer, you must classify it as one of the following:
+- "Completely correct": The answer is accurate, comprehensive, and demonstrates deep understanding.
+- "Partially correct": The answer has some correct elements but contains inaccuracies or is incomplete.
+- "Incorrect": The answer is wrong, irrelevant, or demonstrates fundamental misunderstanding.
+
+IMPORTANT: Responses like "I don't know" or "I am sorry" or "No idea" MUST always be classified as "Incorrect".
+
+Here are the question-answer pairs to evaluate:
+
+{qa_pairs}
+
+For each answer, provide your classification in the following format:
+Answer 1: [classification]
+Answer 2: [classification]
+...
+
+Be strict and objective in your assessment."""
+    
     try:
         prompt_template = load_prompt_template("prompt_evaluation.txt")
     except FileNotFoundError as e:
-        logger.error(f"Failed to load evaluation prompt template: {e}")
-        raise
+        logger.warning(f"Failed to load evaluation prompt template: {e}. Using built-in template.")
+        prompt_template = default_prompt_template
     
     # Format the question-answer pairs for the prompt
     qa_formatted = ""
+    answer_num = 1
     for question, answer in question_answer_pair.items():
-        if not question.strip() or not answer.strip():
-            logger.warning(f"Skipping empty question or answer: Q: '{question}', A: '{answer}'")
+        if not question.strip():
+            logger.warning(f"Skipping empty question: '{question}'")
             continue
-        qa_formatted += f"Question: {question}\nAnswer: {answer}\n\n"
+            
+        # Use empty string if answer is None
+        answer_text = answer.strip() if answer else ""
+        qa_formatted += f"Question {answer_num}: {question}\nAnswer {answer_num}: {answer_text}\n\n"
+        answer_num += 1
     
     if not qa_formatted:
         raise ValueError("No valid question-answer pairs provided")
@@ -232,20 +281,48 @@ def get_questions(prompt: str) -> List[str]:
         logger.error(f"Error generating questions: {e}")
         raise
 
-def get_evaluation(prompt: str) -> int:
+def get_evaluation(prompt: str, qa_pairs: Dict[str, str]) -> int:
     """Evaluate answers to interview questions and return a score.
     
     Args:
         prompt: Formatted prompt for answer evaluation
+        qa_pairs: Dictionary of question-answer pairs being evaluated
         
     Returns:
         int: Percentage score (0-100, rounded to nearest 10)
     """
     try:
+        # Pre-check for "I don't know" answers
+        dont_know_count = sum(1 for answer in qa_pairs.values() if is_dont_know_answer(answer))
+        total_answers = len(qa_pairs)
+        
+        # If most answers are "don't know" type, return a low score immediately
+        if dont_know_count >= total_answers * 0.7 and total_answers > 0:
+            logger.info(f"Most answers ({dont_know_count}/{total_answers}) indicate lack of knowledge. Returning low score.")
+            return 10
+        
         llm = get_llm()
         
+        # Improved prompt with explicit formatting instructions
         evaluation_prompt = PromptTemplate(
-            template=prompt + "\n\nFor each answer, provide EXACTLY ONE classification from: 'Incorrect', 'Partially correct', or 'Completely correct'. Separate classifications with 'QQQ'.",
+            template=prompt + """\n\n
+IMPORTANT INSTRUCTIONS:
+1. For each answer, classify it as EXACTLY ONE of these options:
+   - "Completely correct"
+   - "Partially correct" 
+   - "Incorrect"
+
+2. Any answer resembling "I don't know" or "Sorry" MUST be classified as "Incorrect"
+
+3. Format your response as follows:
+   Answer 1: [classification]
+   Answer 2: [classification]
+   ...
+
+4. Do not include additional explanations or commentary.
+
+Remember to be strict in your evaluation and only use the three classification options.
+""",
             input_variables=[]
         )
         
@@ -258,29 +335,81 @@ def get_evaluation(prompt: str) -> int:
         # Log the raw response for debugging
         logger.debug(f"Raw model response: {response_text}")
         
-        # Process the response more flexibly
-        raw_evaluations = response_text.split('QQQ')
-        
-        # Normalize the evaluations to match our classification keys
+        # Try to extract classifications using regex pattern first
         processed_evaluations = []
-        for eval_result in raw_evaluations:
-            eval_text = eval_result.strip().lower()
+        pattern = r"Answer\s+\d+:\s+(Completely correct|Partially correct|Incorrect)"
+        matches = re.findall(pattern, response_text, re.IGNORECASE)
+        
+        if matches:
+            logger.info(f"Found {len(matches)} classifications using regex")
+            for match in matches:
+                if re.search(r'completely\s+correct', match, re.IGNORECASE):
+                    processed_evaluations.append("Completely correct")
+                elif re.search(r'partially\s+correct', match, re.IGNORECASE):
+                    processed_evaluations.append("Partially correct")
+                else:
+                    processed_evaluations.append("Incorrect")
+        else:
+            # Fallback to simpler parsing if regex doesn't find matches
+            logger.warning("Regex pattern didn't find matches, falling back to simpler parsing")
+            raw_evaluations = response_text.split('QQQ')
+            if len(raw_evaluations) == 1:
+                # Try splitting by newlines if QQQ separator not found
+                raw_evaluations = [line.strip() for line in response_text.splitlines() if line.strip()]
             
-            if "completely correct" in eval_text or "correct" in eval_text and "partially" not in eval_text:
-                processed_evaluations.append("Completely correct")
-            elif "partially correct" in eval_text or "partial" in eval_text:
-                processed_evaluations.append("Partially correct")
-            elif "incorrect" in eval_text or "wrong" in eval_text:
-                processed_evaluations.append("Incorrect")
-            # Skip if we can't classify
+            for eval_result in raw_evaluations:
+                eval_text = eval_result.strip().lower()
+                
+                if "completely correct" in eval_text:
+                    processed_evaluations.append("Completely correct")
+                elif "partially correct" in eval_text:
+                    processed_evaluations.append("Partially correct")
+                elif "incorrect" in eval_text:
+                    processed_evaluations.append("Incorrect")
+                else:
+                    # Skip lines that don't contain a classification
+                    continue
         
         logger.info(f"Processed evaluations: {processed_evaluations}")
         
-        if not processed_evaluations:
+        # Handle mismatch between number of questions and evaluations
+        if len(processed_evaluations) != len(qa_pairs):
+            logger.warning(f"Number of evaluations ({len(processed_evaluations)}) doesn't match number of QA pairs ({len(qa_pairs)})")
+            
+            # If we have more evaluations than questions, trim the list
+            if len(processed_evaluations) > len(qa_pairs):
+                processed_evaluations = processed_evaluations[:len(qa_pairs)]
+            # If we have fewer evaluations than questions, mark the remaining as incorrect
+            else:
+                processed_evaluations.extend(["Incorrect"] * (len(qa_pairs) - len(processed_evaluations)))
+        
+        # Override evaluations for "I don't know" answers
+        final_evaluations = []
+        answer_index = 0
+        for _, answer in qa_pairs.items():
+            if answer_index < len(processed_evaluations):
+                if is_dont_know_answer(answer):
+                    final_evaluations.append("Incorrect")
+                    logger.info(f"Overriding evaluation for 'I don't know' type answer to 'Incorrect'")
+                else:
+                    final_evaluations.append(processed_evaluations[answer_index])
+            answer_index += 1
+        
+        if not final_evaluations:
             logger.warning("No valid evaluations found in model response")
             return 0
         
-        score = calculate_percentage(processed_evaluations, CLASSIFICATIONS)
+        score = calculate_percentage(final_evaluations, CLASSIFICATIONS)
+        
+        # Apply penalty for "I don't know" answers if score is suspiciously high
+        if dont_know_count > 0 and score > 50:
+            penalty_factor = (dont_know_count / total_answers) * 0.5
+            adjusted_score = int(score * (1 - penalty_factor))
+            logger.info(f"Applying penalty for {dont_know_count} 'I don't know' answers. Original score: {score}, Adjusted: {adjusted_score}")
+            score = adjusted_score
+            # Round to nearest 10
+            score = int((score // 10) * 10)
+        
         return score
     except Exception as e:
         logger.error(f"Error evaluating answers: {e}")
@@ -301,13 +430,44 @@ def evaluate_candidate(resume: str, tech_stack: str, difficulty: int,
         Dict: Evaluation results including score and feedback
     """
     try:
+        # Quick check for empty or all "I don't know" answers
+        valid_answers = 0
+        dont_know_count = 0
+        
+        for question, answer in answers.items():
+            if answer and answer.strip():
+                valid_answers += 1
+                if is_dont_know_answer(answer):
+                    dont_know_count += 1
+        
+        # If no valid answers or all answers are "I don't know", return low score immediately
+        if valid_answers == 0:
+            logger.warning("No valid answers provided")
+            return {
+                "score": 0,
+                "raw_score": 0,
+                "feedback": "Unable to evaluate. No valid answers provided.",
+                "evaluated_answers": 0,
+                "status": "success"
+            }
+        elif dont_know_count == valid_answers:
+            logger.info("All answers indicate lack of knowledge")
+            return {
+                "score": 0,
+                "raw_score": 0,
+                "feedback": "Poor performance. Candidate lacks fundamental understanding of the subject matter.",
+                "evaluated_answers": valid_answers,
+                "status": "success"
+            }
+            
         evaluation_prompt = prepare_prompt_for_answercheck(answers)
-        score = get_evaluation(evaluation_prompt)
+        score = get_evaluation(evaluation_prompt, answers)
         
         return {
             "score": score,
+            "raw_score": score,
             "feedback": get_feedback_for_score(score),
-            "evaluated_answers": len(answers),
+            "evaluated_answers": valid_answers,
             "status": "success"
         }
     except Exception as e:
@@ -344,7 +504,18 @@ if __name__ == "__main__":
     logger.info("Testing Groq LangChain implementation...")
     
     try:
-        # Test basic evaluation
+        # Test for "I don't know" type answers
+        test_qa_dont_know = {
+            'What is the difference between synchronous and asynchronous programming in JavaScript?': 'I don\'t know the answer to this question, sorry.'
+        }
+        
+        logger.info("Testing evaluation of 'I don't know' answers...")
+        prompt_dont_know = prepare_prompt_for_answercheck(test_qa_dont_know)
+        score_dont_know = get_evaluation(prompt_dont_know, test_qa_dont_know)
+        logger.info(f"Evaluation score for 'I don't know' answer: {score_dont_know}%")
+        logger.info(f"Feedback: {get_feedback_for_score(score_dont_know)}")
+        
+        # Original test for comparison
         test_qa = {
             'What are the 3 primary colors in the RGB color model?': 'Red, Green, and Blue',
             'What is Python?': 'Python is a high-level, interpreted programming language known for its readability and versatility.',
@@ -354,9 +525,21 @@ if __name__ == "__main__":
         prompt = prepare_prompt_for_answercheck(test_qa)
         logger.info("Prompt prepared successfully.")
         
-        score = get_evaluation(prompt)
+        score = get_evaluation(prompt, test_qa)
         logger.info(f"Evaluation score: {score}%")
         logger.info(f"Feedback: {get_feedback_for_score(score)}")
+        
+        # Test with mixed responses
+        test_qa_mixed = {
+            'What are the 3 primary colors in the RGB color model?': 'Red, Green, and Blue',
+            'What is Python?': 'I don\'t know',
+            'Explain the concept of object-oriented programming.': 'Object-oriented programming is a paradigm where code is organized around objects rather than functions and logic. It uses classes and objects to structure code.'
+        }
+        
+        prompt_mixed = prepare_prompt_for_answercheck(test_qa_mixed)
+        score_mixed = get_evaluation(prompt_mixed, test_qa_mixed)
+        logger.info(f"Evaluation score for mixed answers: {score_mixed}%")
+        logger.info(f"Feedback: {get_feedback_for_score(score_mixed)}")
         
     except Exception as e:
         logger.error(f"Test failed: {e}")

@@ -1,21 +1,13 @@
-import json
-import pdfplumber
-import fitz
-import mimetypes
-import random
-import cv2
-import numpy as np
-import logging
-from fastapi import FastAPI, HTTPException, status, File, UploadFile, Request, Body
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, HTTPException, status, File, UploadFile, Body
 from fastapi.responses import JSONResponse
 from typing import Annotated, Dict, Optional, List, Union
+import json
+import fitz
+import logging
 import uvicorn
 
-
 # Import the improved functions from our evaluation module
-# Assuming the previous code is saved in a module named 'evaluation_system'
-from api_request import (
+from mock_interview_app.api_request import (
     prepare_prompt, 
     get_questions, 
     prepare_prompt_for_answercheck, 
@@ -26,20 +18,16 @@ from api_request import (
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger(__name__)
 
-# Create the FastAPI app
-app = FastAPI(
-    title="Candidate Evaluation API",
-    description="API for generating interview questions and evaluating candidate answers",
-    version="1.0.0"
+# Create router
+router = APIRouter(
+    prefix="/candidates",
+    tags=["candidate evaluation"],
+    responses={404: {"description": "Not found"}},
 )
 
-@app.post("/questions", response_description="Questions generated using LangChain with Groq")
+@router.post("/questions", response_description="Questions generated using LangChain with Groq")
 async def langchain_questions(
     file: Annotated[UploadFile, File(description="A file read as UploadFile")], 
     data: str = None):
@@ -51,12 +39,6 @@ async def langchain_questions(
         
     Returns:
         Dictionary containing metadata and generated questions
-    Examples:
-        data:{
-            "techStack": "Python, JavaScript",
-            "difficultyLevel": 3,
-            "questionCount": 5
-        }
     """
     try:
         # Validate file type
@@ -164,7 +146,7 @@ async def langchain_questions(
             detail=f"An unexpected error occurred: {str(e)}"
         )
 
-@app.post("/check-answers", response_description="Checking answers using LangChain with Groq")
+@router.post("/check-answers", response_description="Checking answers using LangChain with Groq")
 async def check_answers(json_data: dict = Body(...)):
     """Evaluate candidate answers to interview questions.
     
@@ -199,11 +181,18 @@ async def check_answers(json_data: dict = Body(...)):
         # Generate evaluation prompt and get score
         try:
             prompt = prepare_prompt_for_answercheck(json_data)
-            score = get_evaluation(prompt)
+            logger.info(f"Generated evaluation prompt, length: {len(prompt)}")
+            
+            # Get evaluation result with both required parameters
+            score = get_evaluation(prompt, json_data)
+            logger.info(f"Evaluation score: {score}")
+            
+            # Get feedback based on score
             feedback = get_feedback_for_score(score)
             
             return {
                 "score": score,
+                "raw_score": score,
                 "feedback": feedback,
                 "evaluated_answers": len(json_data),
                 "status": "success"
@@ -225,7 +214,7 @@ async def check_answers(json_data: dict = Body(...)):
             detail=f"An unexpected error occurred: {str(e)}"
         )
 
-@app.post("/complete-evaluation", response_description="End-to-end candidate evaluation")
+@router.post("/complete-evaluation", response_description="End-to-end candidate evaluation")
 async def complete_evaluation(
     file: Annotated[UploadFile, File(description="Candidate resume as PDF")], 
     tech_stack: str = Body(...),
@@ -308,23 +297,50 @@ async def complete_evaluation(
                 detail="No answers provided for evaluation"
             )
             
-        # Perform the evaluation
-        result = evaluate_candidate(
-            resume=resume_text,
-            tech_stack=tech_stack,
-            difficulty=difficulty,
-            question_count=question_count,
-            answers=answers
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["error"]
+        # Perform the evaluation with improved error handling
+        try:
+            result = evaluate_candidate(
+                resume=resume_text,
+                tech_stack=tech_stack,
+                difficulty=difficulty,
+                question_count=question_count,
+                answers=answers
             )
             
-        return result
-        
+            # Add additional debug logging
+            logger.info(f"Evaluation result status: {result.get('status', 'unknown')}")
+            
+            if result.get("status") == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=result.get("error", "Unknown evaluation error")
+                )
+                
+            # Ensure score is properly formatted
+            if "score" in result:
+                try:
+                    if isinstance(result["score"], str):
+                        result["score"] = float(result["score"].strip())
+                    else:
+                        result["score"] = float(result["score"])
+                    
+                    # Ensure score is within valid range
+                    result["score"] = max(0, min(100, result["score"]))
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Invalid score format in result: {result['score']}")
+                    result["raw_score"] = result["score"]
+                    result["score"] = 0
+                    result["score_error"] = str(e)
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error during candidate evaluation: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Evaluation failed: {str(e)}"
+            )
+            
     except HTTPException:
         # Re-raise HTTP exceptions to preserve their status codes
         raise
@@ -334,9 +350,3 @@ async def complete_evaluation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unexpected error occurred: {str(e)}"
         )
-
-# Add a simple root endpoint for API health check
-@app.get("/", response_description="API Status")
-async def root():
-    return {"status": "online", "message": "Candidate Evaluation API is running"}
-
