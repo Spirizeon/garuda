@@ -1,19 +1,24 @@
-# Use official Python image as the base
-FROM python:latest
+FROM python:3.11-slim
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file
+# Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install -r requirements.txt
+# Install system dependencies and Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get remove -y gcc python3-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the application files
+# Copy the application code
 COPY . .
 
-# Expose the port FastAPI runs on
+# Expose port 8000
 EXPOSE 8000
 
 # Command to run the application
