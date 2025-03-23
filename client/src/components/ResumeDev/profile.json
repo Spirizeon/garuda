@@ -1,0 +1,84 @@
+{
+    "personal_info": {
+      "name": "John Doe",
+      "age": 25,
+      "address": {
+        "street": "123 Main Street",
+        "city": "New York",
+        "state": "NY",
+        "zip": "10001",
+        "country": "USA"
+      },
+      "phone_number": "+1 234-567-8901",
+      "email": "johndoe@example.com",
+      "linkedin": "https://linkedin.com/in/johndoe",
+      "github": "https://github.com/johndoe",
+      "website": "https://johndoe.dev"
+    },
+    "skills": [
+      "JavaScript",
+      "React.js",
+      "Node.js",
+      "Python",
+      "Machine Learning",
+      "Data Structures & Algorithms",
+      "Database Management",
+      "Cybersecurity",
+      "Cloud Computing"
+    ],
+    "education": [
+      {
+        "degree": "Bachelor of Technology",
+        "field": "Computer Science and Engineering",
+        "university": "XYZ University",
+        "year_of_graduation": 2024,
+        "cgpa": 8.9
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Google Data Analytics Certificate",
+        "issuer": "Google",
+        "year": 2023
+      },
+      {
+        "title": "AWS Certified Solutions Architect",
+        "issuer": "Amazon Web Services",
+        "year": 2022
+      }
+    ],
+    "projects": [
+      {
+        "title": "AI-Powered Resume Builder",
+        "description": "Developed an AI-based web application that dynamically generates resumes based on user input.",
+        "technologies": ["React.js", "Node.js", "GPT API", "MongoDB"],
+        "github_link": "https://github.com/johndoe/resume-builder"
+      },
+      {
+        "title": "Secure Chat App",
+        "description": "Built an end-to-end encrypted chat application with AI-assisted message summarization.",
+        "technologies": ["Next.js", "Socket.io", "WebRTC", "AES Encryption"],
+        "github_link": "https://github.com/johndoe/secure-chat"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Software Engineer Intern",
+        "company": "Tech Corp",
+        "duration": "June 2023 - Dec 2023",
+        "responsibilities": [
+          "Developed APIs for a high-traffic web application.",
+          "Implemented authentication and role-based access control.",
+          "Optimized database queries to improve response time by 30%."
+        ]
+      }
+    ],
+    "achievements": [
+      "Finalist in Google Solution Challenge 2023",
+      "Top 5% in LeetCode Global Coding Contest",
+      "Published research paper on AI in Education at ICML 2024"
+    ],
+    "languages": ["English", "Spanish", "French"],
+    "interests": ["Open Source Contributions", "Cybersecurity Research", "AI Ethics"]
+  }
+  

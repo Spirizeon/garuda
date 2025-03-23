@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import resumeData from './resumeData.json';
+import profile from './profile.json'
 
 export default function ChatInterface({ onResumeData }) {
   const [messages, setMessages] = useState([
@@ -47,10 +48,8 @@ export default function ChatInterface({ onResumeData }) {
           { text: `Thanks! Analyzing your profile for a ${jobRole} position...`, sender: 'bot' }
         ]);
         
-        // Mock delay to simulate processing
-        setTimeout(() => {
-          processResume(jobRole, input);
-        }, 2000);
+        // Make API call to generate the resume
+        fetchCustomizedResume(jobRole, input);
       }
     } catch (error) {
       console.error('Error processing request:', error);
@@ -63,33 +62,63 @@ export default function ChatInterface({ onResumeData }) {
     }
   };
 
-  const processResume = async (role, description) => {
+  const fetchCustomizedResume = async (role, description) => {
     try {
-      // Use the actual resume data from the JSON file instead of mock data
+      setIsLoading(true);
       
-      // Update messages to reflect findings
+      // Prepare request payload according to the API documentation
+      const payload = {
+        user_profile: profile,
+        resume_template: resumeData,
+        job_description: description
+      };
+      
+      // Make the API call
+      const response = await fetch('/api/resume/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+      
+      // Parse the response - according to docs it should have a "resume" property
+      const responseData = await response.json();
+      
+      // Log the entire response
+      console.log("API Response:", responseData);
+      
+      // Extract the resume data from the response
+      const customizedResumeData = responseData.resume;
+      console.log("Customized Resume Data:", customizedResumeData);
+      
+      // Update messages to reflect success
       setMessages(prev => [
         ...prev,
         { text: `Identifying relevant skills for this position...`, sender: 'bot' },
-        { text: `I found ${resumeData.skills.length} relevant skills for this position.`, sender: 'bot' },
+        { text: `I found ${customizedResumeData.skills?.length || 0} relevant skills for this position.`, sender: 'bot' },
         { text: `Identifying relevant projects for this position...`, sender: 'bot' },
-        { text: `I found ${resumeData.projects.length} relevant projects for this position.`, sender: 'bot' },
+        { text: `I found ${customizedResumeData.projects?.length || 0} relevant projects for this position.`, sender: 'bot' },
         { text: `Identifying relevant work experience...`, sender: 'bot' },
-        { text: `I found ${resumeData.workEx.length} relevant work experiences for this position.`, sender: 'bot' },
+        { text: `I found ${customizedResumeData.workEx?.length || 0} relevant work experiences for this position.`, sender: 'bot' },
         { text: `Generating a tailored summary for your resume...`, sender: 'bot' },
         { text: `Your resume is ready! I've created a tailored resume that highlights your relevant skills and experience for this ${role} position. You can view it in the preview panel and download it as a PDF.`, sender: 'bot' }
       ]);
       
-      // Pass the resume data from the JSON file up to the parent component
-      onResumeData(resumeData);
+      // Pass the customized resume data to the parent component
+      onResumeData(customizedResumeData);
       
       // Mark process as complete
       setStage('complete');
     } catch (error) {
-      console.error('Error processing resume:', error);
+      console.error('Error fetching customized resume:', error);
       setMessages(prev => [
         ...prev,
-        { text: 'Sorry, there was an error generating your resume. Please try again.', sender: 'bot' }
+        { text: 'Sorry, there was an error generating your customized resume. Please try again.', sender: 'bot' }
       ]);
     } finally {
       setIsLoading(false);
