@@ -2,17 +2,9 @@ import React from "react";
 import Topbar from "@/components/Topbar";
 import { Outlet } from "react-router-dom";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+import { FlipWords } from "@/components/ui/flip-words";
 
-const words = [
-  {
-    text: "L e t s ",
-    className: "text-blue-500 dark:text-pink-500 text-5xl",
-  },
-  {
-    text: "  B u i l d . . .",
-    className: "text-yellow-200 dark:text-yellow-500 text-5xl",
-  },
-];
+const words = ["Stronger", "Better", "Higher"];
 
 const Dashboard = () => {
   return (
@@ -23,8 +15,8 @@ const Dashboard = () => {
       </div>
 
       {/* Scrollable Content */}
-      <div className=" ml-[40%] mt-[22%]">
-        <TypewriterEffectSmooth words={words} />
+      <div className=" ml-[40%] mt-[20%]">
+        <span className="text-5xl text-yellow-500">Build<FlipWords words={words}/> </span>
       </div>
     </div>
   );
