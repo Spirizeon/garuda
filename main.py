@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Create the FastAPI app
 app = FastAPI(
-    title="Candidate Evaluation API",
+    title="Fastapi Endpoints",
     description="API for generating interview questions and evaluating candidate answers",
     version="1.0.0"
 )
