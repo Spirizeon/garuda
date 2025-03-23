@@ -37,4 +37,6 @@ dist-ssr
 *.pid.lock
 *.log.lock
 *.lock
-*.lock.lock
+*.lock.lock__pycache__/
+__pycache__/
+**/__pycache__/
