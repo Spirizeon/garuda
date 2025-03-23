@@ -5,18 +5,13 @@ import resumeData from '../components/ResumeResearch/resumeData.json'
 import ChatInterface from '../components/ResumeResearch/ChatInterface'
 import Topbar from '@/components/Topbar'
 
-<<<<<<< HEAD
 function App({ resumeType = 'developer' }) {
-=======
-function App() {
->>>>>>> upstream/main
   const [currentResumeData, setCurrentResumeData] = useState(resumeData);
 
   const handleResumeData = (data) => {
     setCurrentResumeData(data);
   };
 
-<<<<<<< HEAD
   // Get the title based on resume type
   const getResumeTitle = () => {
     switch(resumeType) {
@@ -46,18 +41,6 @@ function App() {
         </div>
         <div className="w-2/3">
           <ResumePreview data={currentResumeData} resumeType={resumeType} />
-=======
-  return (
-    <>
-    <Topbar/>
-    <div className="flex h-screen bg-black p-6">
-      <div className="flex gap-6 w-full h-full ">
-        <div className="w-1/3">
-          <ChatInterface onResumeData={handleResumeData} />
-        </div>
-        <div className="w-2/3">
-          <ResumePreview data={currentResumeData} />
->>>>>>> upstream/main
         </div>
       </div>
     </div>

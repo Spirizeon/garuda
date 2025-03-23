@@ -28,7 +28,6 @@ const ChooseResume = () => {
   return (
     <>
     <Topbar/>
-<<<<<<< HEAD
 
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -53,12 +52,6 @@ const ChooseResume = () => {
           ))}
         </div>
       </div>
-=======
-    <div className='bg-black h-screen'>
-    <ResumeCards/>
-    <ResumeCards/>
-    <ResumeCards/>
->>>>>>> upstream/main
     </div>
     </>
   )

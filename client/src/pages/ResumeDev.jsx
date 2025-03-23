@@ -29,7 +29,6 @@ function App({ resumeType = 'developer' }) {
   return (
     <>
     <Topbar/>
-<<<<<<< HEAD
     <div className="flex flex-col bg-gray-950 min-h-screen">
       <div className="px-6 py-4">
         <h1 className="text-2xl font-bold text-white">{getResumeTitle()}</h1>
@@ -37,10 +36,6 @@ function App({ resumeType = 'developer' }) {
       </div>
       
       <div className="flex flex-1 gap-6 p-6">
-=======
-    <div className="flex h-screen bg-black p-6">
-      <div className="flex gap-6 w-full h-full">
->>>>>>> upstream/main
         <div className="w-1/3">
           <ChatInterface onResumeData={handleResumeData} resumeType={resumeType} />
         </div>
