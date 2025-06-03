@@ -4,7 +4,7 @@
 
 This repository contains a **Resume Builder Application** designed to assist users in creating, updating, and managing resumes tailored to specific job descriptions. The application consists of two main components:
 
-1. **Backend API**: Built using FastAPI and LangChain for intelligent resume generation.
+1. **Backend API**: We've Built using FastAPI and LangChain for intelligent resume generation.
 2. **Frontend Application**: A React-based interface powered by Vite for seamless user interaction.
 
 ---
